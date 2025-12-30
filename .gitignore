@@ -3,3 +3,4 @@ __pycache__/
 .env
 rag_db_data/
 *.log
+data/
