@@ -22,7 +22,7 @@ async def set_document_status(db: AsyncSession, document_id: UUID, status: str) 
     await db.commit()
 
 async def list_chunks_by_document(db: AsyncSession, document_id: UUID, limit: int = 50) -> list[Chunk]:
-    res = await db.execute(select(Chunk).where(Chunk.document.id==document_id).limit(limit))
+    res = await db.execute(select(Chunk).where(Chunk.document_id==document_id).limit(limit))
     return list(res.scalars().all())
 
     

@@ -20,4 +20,4 @@ class ChunkRead(BaseModel):
     id: UUID
     chunk_index: int
     content: str
-    chuck_meta: dict[str, Any]
+    chunk_meta: dict[str, Any]

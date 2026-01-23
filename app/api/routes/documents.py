@@ -5,13 +5,20 @@ from uuid import UUID
 from app.db.session import get_db, AsyncSessionLocal
 from app.db.crud import create_document, get_document, list_chunks_by_document
 from app.schemas.documents import DocumentCreateResponse, DocumentRead, ChunkRead
-from app.storage.local import save_upload_file
+from app.storage.base import save_file
 from app.rag.ingest import ingest_document
+from app.core.config import settings
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 @router.post("", response_model=DocumentCreateResponse)
-async def upload_document(background: BackgroundTasks, file: UploadFile = File(...), source: str | None = Form(None), project: str | None = Form(None), db: AsyncSession = Depends(get_db)):
+async def upload_document(
+    background: BackgroundTasks,
+    file: UploadFile = File(...),
+    source: str | None = Form(None),
+    project: str | None = Form(None),
+    db: AsyncSession = Depends(get_db)
+):
     content = await file.read()
     doc = await create_document(
         db=db,
@@ -20,20 +27,28 @@ async def upload_document(background: BackgroundTasks, file: UploadFile = File(.
         project=project,
         tags={}
     )
-    path = save_upload_file(doc.id, file.filename, content)
-    async def _run():
-        async with AsyncSessionLocal() as task_db:
-            await ingest_document(task_db, doc.id, path)
 
-    background.add_task(_run)
-    return DocumentCreateResponse(id=doc.id,status=doc.status)
+    # Salva no storage (local ou S3)
+    file_path = save_file(doc.id, file.filename, content)
+
+    # Processa via SQS ou background task
+    if settings.USE_SQS and settings.SQS_QUEUE_URL:
+        from app.queue.sqs import send_ingest_message
+        send_ingest_message(doc.id, file_path)
+    else:
+        async def _run():
+            async with AsyncSessionLocal() as task_db:
+                await ingest_document(task_db, doc.id, file_path)
+        background.add_task(_run)
+
+    return DocumentCreateResponse(id=doc.id, status=doc.status)
 
 @router.get("/{document_id}", response_model=DocumentRead)
 async def read_document(document_id: UUID, db: AsyncSession = Depends(get_db)):
     doc = await get_document(db, document_id)
     if not doc:
         from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail='Dcoument not found')
+        raise HTTPException(status_code=404, detail='Document not found')
     return DocumentRead(
         id=doc.id,
         title=doc.title,
@@ -53,7 +68,7 @@ async def read_chunks(document_id: UUID, db: AsyncSession = Depends(get_db)):
             id=c.id,
             chunk_index=c.chunk_index,
             content=c.content,
-            chunk_meta=c.metadata,
+            chunk_meta=c.chunk_meta,
         )
         for c in chunks
     ]

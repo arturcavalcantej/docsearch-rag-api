@@ -5,6 +5,8 @@ from app.db.session import get_db
 from app.schemas.query import QueryRequest, QueryResponse, Citation
 from app.rag.embedder import embed_query
 from app.rag.retrieve import retrieve_top_chunks
+from app.rag.llm import generate_answer
+from app.core.config import settings
 
 router = APIRouter(prefix="/query", tags=["query"])
 
@@ -22,12 +24,11 @@ async def query(req: QueryRequest, db: AsyncSession = Depends(get_db)):
 
     if not hits:
         return QueryResponse(
-            answer="Não encontrei contexto suficiente nos documentos indexados.",
+            answer="Nao encontrei contexto suficiente nos documentos indexados.",
             citations=[],
             retrieved_context_preview="",
         )
 
-    # MVP: “geração” simples (sem LLM): devolve contexto com estrutura e citações.
     context_parts = []
     citations = []
     for chunk, doc in hits:
@@ -37,11 +38,24 @@ async def query(req: QueryRequest, db: AsyncSession = Depends(get_db)):
         )
 
     preview = "\n\n".join(context_parts)[:2000]
-    answer = (
-        "Encontrei estes trechos relevantes nos documentos. "
-        "Se quiser, posso plugar um LLM depois para gerar uma resposta final usando esse contexto.\n\n"
-        + preview
-    )
+
+    # Gera resposta com LLM se habilitado e configurado
+    if req.use_llm and settings.OPENAI_API_KEY:
+        try:
+            context_for_llm = "\n\n".join([chunk.content for chunk, doc in hits])
+            answer = await generate_answer(req.question, context_for_llm)
+        except Exception as e:
+            # Fallback para resposta sem LLM em caso de erro
+            answer = (
+                f"[LLM indisponivel: {type(e).__name__}] "
+                "Encontrei estes trechos relevantes nos documentos.\n\n"
+                + preview
+            )
+    else:
+        answer = (
+            "Encontrei estes trechos relevantes nos documentos.\n\n"
+            + preview
+        )
 
     return QueryResponse(
         answer=answer,

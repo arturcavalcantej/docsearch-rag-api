@@ -7,6 +7,7 @@ class QueryRequest(BaseModel):
     top_k: int = 5
     project: Optional[str] = None
     source: Optional[str] = None
+    use_llm: bool = True
 
 class Citation(BaseModel):
     document_id: UUID
