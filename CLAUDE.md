@@ -17,6 +17,9 @@ alembic revision --autogenerate -m "description"
 
 # Install dependencies
 pip install -r requirements.txt
+
+# System dependencies (Ubuntu/WSL) - required for OCR
+sudo apt-get install tesseract-ocr tesseract-ocr-por tesseract-ocr-eng poppler-utils
 ```
 
 ## Architecture
@@ -39,8 +42,12 @@ RAG API built with FastAPI, PostgreSQL/pgvector, and sentence-transformers.
 
 ### Key Components
 
+- **Text Extraction** (`app/rag/extractor.py`): Orchestrator that selects appropriate extractor based on file type
+  - `extractors/pdf.py`: PDF text extraction with pdfplumber, OCR fallback for scanned PDFs
+  - `extractors/image.py`: Image OCR via pytesseract
+  - `extractors/text.py`: Plain text files (txt, md, csv, etc.)
 - **Embeddings**: `paraphrase-multilingual-MiniLM-L12-v2` (384 dims), lazy singleton in `app/rag/embedder.py`
-- **Vector Storage**: pgvector with `Vector(384)`, cosine distance search
+- **Vector Storage**: pgvector with `Vector(384)`, cosine distance search in `app/rag/retrieve.py`
 - **LLM Generation** (`app/rag/llm.py`): OpenAI or Gemini with automatic fallback
 - **Storage** (`app/storage/base.py`): Abstraction layer supporting local filesystem or S3
 - **Queue** (`app/queue/sqs.py`): Optional SQS for async ingestion, consumed by `worker.py`
@@ -59,3 +66,5 @@ See `.env.example`. Key settings:
 - `LLM_PROVIDER`: `openai` or `gemini` (requires corresponding API key)
 - `STORAGE_BACKEND`: `local` or `s3`
 - `USE_SQS`: Enable SQS queue for document processing (requires `SQS_QUEUE_URL`)
+- `OCR_ENABLED`: Enable OCR for scanned PDFs and images (default: true)
+- `OCR_LANGUAGE`: Tesseract languages (default: `por+eng`)

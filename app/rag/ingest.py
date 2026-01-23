@@ -1,16 +1,12 @@
+import os
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.crud import set_document_status
 from app.models.chunk import Chunk
 from app.rag.chunking import chunk_text
 from app.rag.embedder import embed_texts
+from app.rag.extractor import extract_text
 from app.storage.base import load_file
-from app.core.config import settings
-
-
-def extract_text(content: bytes) -> str:
-    """Extrai texto do conteudo do arquivo."""
-    return content.decode("utf-8", errors="ignore")
 
 
 async def ingest_document(db: AsyncSession, document_id, file_path: str) -> None:
@@ -20,16 +16,21 @@ async def ingest_document(db: AsyncSession, document_id, file_path: str) -> None
 
         # Carrega arquivo do storage (local ou S3)
         content = load_file(file_path)
-        text = extract_text(content)
 
+        # Extrai nome do arquivo para ajudar na deteccao de tipo
+        filename = os.path.basename(file_path)
+        text = extract_text(content, filename)
+        print(text[:2500])  # printa os primeiros 2500 caracteres
         chunks = chunk_text(text)
+        print(f" {(chunks)} chunks.")
 
         if not chunks:
             await set_document_status(db, document_id, "FAILED")
             return
 
-        vectors = embed_texts(chunks)
 
+        vectors = embed_texts(chunks)
+        print(vectors)
         rows = []
         for i, (c, v) in enumerate(zip(chunks, vectors)):
             rows.append(

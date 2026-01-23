@@ -40,7 +40,7 @@ async def query(req: QueryRequest, db: AsyncSession = Depends(get_db)):
     preview = "\n\n".join(context_parts)[:2000]
 
     # Gera resposta com LLM se habilitado e configurado
-    if req.use_llm and settings.OPENAI_API_KEY:
+    if req.use_llm and (settings.OPENAI_API_KEY or settings.GEMINI_API_KEY):
         try:
             context_for_llm = "\n\n".join([chunk.content for chunk, doc in hits])
             answer = await generate_answer(req.question, context_for_llm)

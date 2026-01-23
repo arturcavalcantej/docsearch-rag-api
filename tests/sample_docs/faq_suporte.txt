@@ -1,0 +1,67 @@
+FAQ - Central de Suporte TechCorp
+
+=== CONTA E ACESSO ===
+
+Como recuperar minha senha?
+Para recuperar sua senha, acesse a página de login e clique em "Esqueci minha senha".
+Você receberá um email com um link para criar uma nova senha. O link expira em 24 horas.
+Se não receber o email, verifique sua pasta de spam.
+
+Como alterar meu email cadastrado?
+Acesse Configurações > Minha Conta > Dados Pessoais. Clique em "Editar" ao lado do email.
+Você precisará confirmar a alteração através do email antigo e do novo.
+
+Como ativar autenticação de dois fatores?
+Vá em Configurações > Segurança > Autenticação em duas etapas.
+Você pode usar um aplicativo autenticador (Google Authenticator, Authy) ou receber códigos por SMS.
+Recomendamos fortemente ativar esta opção para proteger sua conta.
+
+=== PAGAMENTOS E ASSINATURA ===
+
+Quais formas de pagamento são aceitas?
+Aceitamos cartão de crédito (Visa, Mastercard, Elo, American Express), boleto bancário e PIX.
+Para pagamentos recorrentes, apenas cartão de crédito está disponível.
+
+Como cancelar minha assinatura?
+Acesse Configurações > Assinatura > Gerenciar Plano > Cancelar Assinatura.
+O cancelamento é efetivado ao final do período já pago. Você não receberá reembolso proporcional.
+Seus dados ficam armazenados por 90 dias após o cancelamento.
+
+Como solicitar reembolso?
+Reembolsos são concedidos apenas para cobranças nos últimos 7 dias.
+Envie um email para financeiro@techcorp.com com o assunto "Solicitação de Reembolso"
+incluindo seu CPF e o motivo da solicitação. Prazo de resposta: 5 dias úteis.
+
+=== PROBLEMAS TÉCNICOS ===
+
+O aplicativo está travando, o que fazer?
+Primeiro, tente fechar completamente o app e abrir novamente.
+Se persistir, limpe o cache: Configurações do celular > Aplicativos > TechCorp > Limpar Cache.
+Como última opção, desinstale e reinstale o aplicativo.
+
+Não consigo fazer upload de arquivos
+Verifique se o arquivo tem menos de 50MB e está em formato suportado (PDF, JPG, PNG, DOC).
+Certifique-se de ter uma conexão estável com a internet.
+Se usar VPN corporativa, tente desativar temporariamente.
+
+A página não carrega corretamente
+Limpe o cache do navegador (Ctrl+Shift+Delete) e tente novamente.
+Teste em outro navegador (Chrome, Firefox, Edge) para verificar se o problema persiste.
+Desative extensões do navegador que podem interferir (bloqueadores de anúncio, etc).
+
+=== PRIVACIDADE E DADOS ===
+
+Como solicitar exclusão dos meus dados?
+Conforme a LGPD, você pode solicitar a exclusão completa dos seus dados.
+Acesse Configurações > Privacidade > Solicitar Exclusão de Dados.
+O processo leva até 15 dias úteis. Você receberá confirmação por email.
+
+Meus dados estão seguros?
+Utilizamos criptografia AES-256 para dados em repouso e TLS 1.3 para dados em trânsito.
+Nossos servidores estão localizados no Brasil, em conformidade com a LGPD.
+Realizamos auditorias de segurança trimestrais com empresas especializadas.
+
+Como exportar meus dados?
+Vá em Configurações > Privacidade > Exportar Meus Dados.
+Você receberá um arquivo ZIP com todos os seus dados em formato JSON.
+O link para download fica disponível por 7 dias.

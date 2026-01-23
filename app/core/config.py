@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # Gemini (Google)
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-2.0-flash"
+    GEMINI_MODEL: str = "gemini-2.5-flash"
 
     # Storage: "local" ou "s3"
     STORAGE_BACKEND: Literal["local", "s3"] = "local"
@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     # SQS Settings
     SQS_QUEUE_URL: Optional[str] = None
     USE_SQS: bool = False
+
+    # OCR Settings
+    OCR_ENABLED: bool = True
+    OCR_LANGUAGE: str = "por+eng"
+    OCR_MIN_TEXT_LENGTH: int = 50
+    OCR_TIMEOUT: int = 300
 
     class Config:
         env_file= ".env"
