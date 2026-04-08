@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +9,7 @@ from app.rag.retrieve import retrieve_top_chunks
 from app.rag.llm import generate_answer
 from app.core.config import settings
 
+from app.rag.langchain_pipeline import langchain_query
 router = APIRouter(prefix="/query", tags=["query"])
 
 @router.post("", response_model=QueryResponse)
@@ -15,11 +17,8 @@ async def query(req: QueryRequest, db: AsyncSession = Depends(get_db)):
     qvec = embed_query(req.question)
 
     hits = await retrieve_top_chunks(
-        db=db,
-        query_vec=qvec,
-        top_k=req.top_k,
-        project=req.project,
-        source=req.source,
+        db=db, query_vec=qvec, top_k=req.top_k,
+        project=req.project, source=req.source,
     )
 
     if not hits:
@@ -62,3 +61,29 @@ async def query(req: QueryRequest, db: AsyncSession = Depends(get_db)):
         citations=citations,
         retrieved_context_preview=preview,
     )
+
+
+@router.post("/langchain", response_model=QueryResponse)
+async def query_langchain(req: QueryRequest, db: AsyncSession = Depends(get_db)):
+    result = await langchain_query(
+        question=req.question,
+        top_k=req.top_k,
+        project=req.project,
+        source=req.source,
+        use_llm=req.use_llm,
+        db=db
+    )
+
+    return QueryResponse(
+        answer=result["answer"],
+        citations=[
+            Citation(
+                document_id=c["document_id"],
+                chunk_id=c["chunk_id"],
+                chunk_index=c["chunk_index"]
+            )
+            for c in result["citations"]
+        ],
+        retrieved_context_preview=result["retrieved_context_preview"],
+    )
+

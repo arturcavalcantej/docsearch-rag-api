@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks, Depends, Form
+from fastapi import APIRouter, UploadFile, File, BackgroundTasks, Depends, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
@@ -47,7 +47,6 @@ async def upload_document(
 async def read_document(document_id: UUID, db: AsyncSession = Depends(get_db)):
     doc = await get_document(db, document_id)
     if not doc:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail='Document not found')
     return DocumentRead(
         id=doc.id,

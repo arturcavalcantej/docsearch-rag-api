@@ -6,3 +6,4 @@ rag_db_data/
 data/
 .claude
 .env.example
+*GUIDE.md

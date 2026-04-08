@@ -4,10 +4,10 @@ from uuid import UUID
 
 from app.models.document import Document
 from app.models.chunk import Chunk
-
+from app.models.enums import DocumentStatus
 
 async def create_document(db: AsyncSession, title: str, source: str, project: str, tags:dict) -> Document:
-    doc = Document(title=title,source=source,project=project,tags=tags,status='PENDING')
+    doc = Document(title=title,source=source,project=project,tags=tags,status=DocumentStatus.PENDING)
     db.add(doc)
     await db.commit()
     await db.refresh(doc)
@@ -17,7 +17,7 @@ async def get_document(db: AsyncSession, document_id: UUID) -> Document | None:
     res = await db.execute(select(Document).where(Document.id==document_id))
     return res.scalar_one_or_none()
 
-async def set_document_status(db: AsyncSession, document_id: UUID, status: str) -> None:
+async def set_document_status(db: AsyncSession, document_id: UUID, status: DocumentStatus) -> None:
     await db.execute(update(Document).where(Document.id == document_id).values(status=status))
     await db.commit()
 
