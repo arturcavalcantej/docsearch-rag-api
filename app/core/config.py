@@ -33,6 +33,12 @@ class Settings(BaseSettings):
     OCR_MIN_TEXT_LENGTH: int = 50
     OCR_TIMEOUT: int = 300
 
+    # Chunking settings
+    CHUNKING_STRATEGY: Literal["fixed", "recursive"] = "recursive"
+    CHUNK_MAX_CHARS: int = 3500
+    CHUNK_OVERLAP: int = 200
+
+
     class Config:
         env_file= ".env"
 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Optional
 from uuid import UUID
 
 class QueryRequest(BaseModel):
@@ -8,6 +8,8 @@ class QueryRequest(BaseModel):
     project: Optional[str] = None
     source: Optional[str] = None
     use_llm: bool = True
+    use_hybrid: bool = False  # NOVO
+    use_reranking: bool = False
 
 class Citation(BaseModel):
     document_id: UUID

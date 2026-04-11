@@ -8,6 +8,7 @@ from app.rag.embedder import embed_query
 from app.rag.retrieve import retrieve_top_chunks
 from app.rag.llm import generate_answer
 from app.core.config import settings
+from app.rag.retrieve import retrieve_hybrid
 
 from app.rag.langchain_pipeline import langchain_query
 router = APIRouter(prefix="/query", tags=["query"])
@@ -15,11 +16,16 @@ router = APIRouter(prefix="/query", tags=["query"])
 @router.post("", response_model=QueryResponse)
 async def query(req: QueryRequest, db: AsyncSession = Depends(get_db)):
     qvec = embed_query(req.question)
-
-    hits = await retrieve_top_chunks(
-        db=db, query_vec=qvec, top_k=req.top_k,
-        project=req.project, source=req.source,
-    )
+    if req.use_hybrid:
+        hits = await retrieve_hybrid(
+            db=db, query_text=req.question, query_vec=qvec,
+            top_k=req.top_k, project=req.project, source=req.source, use_reranking=req.use_reranking
+        )
+    else:
+        hits = await retrieve_top_chunks(
+            db=db, query_vec=qvec, top_k=req.top_k,
+            project=req.project, source=req.source,
+        )
 
     if not hits:
         return QueryResponse(
