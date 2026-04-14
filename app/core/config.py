@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # Gemini (Google)
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-3.1-pro-preview"
 
     # Storage: "local" ou "s3"
     STORAGE_BACKEND: Literal["local", "s3"] = "local"

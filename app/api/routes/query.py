@@ -9,6 +9,7 @@ from app.rag.retrieve import retrieve_top_chunks
 from app.rag.llm import generate_answer
 from app.core.config import settings
 from app.rag.retrieve import retrieve_hybrid
+from app.rag.agent_basic import basic_agent
 
 from app.rag.langchain_pipeline import langchain_query
 router = APIRouter(prefix="/query", tags=["query"])
@@ -93,3 +94,7 @@ async def query_langchain(req: QueryRequest, db: AsyncSession = Depends(get_db))
         retrieved_context_preview=result["retrieved_context_preview"],
     )
 
+@router.post("/agent")
+async def query_agent(req: QueryRequest):
+    answer = await basic_agent(req.question)
+    return {"answer": answer}
