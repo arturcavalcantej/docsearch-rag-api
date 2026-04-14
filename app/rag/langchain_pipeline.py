@@ -14,7 +14,7 @@ def _get_llm():
         from langchain_openai import ChatOpenAI
         return ChatOpenAI(model=settings.OPENAI_MODEL, api_key=settings.OPENAI_API_KEY, temperature=0.3, max_tokens=1024)
     elif settings.LLM_PROVIDER == "gemini" and settings.GEMINI_API_KEY:
-        from langchain_gemini import ChatGoogleGenerativeAI
+        from langchain_google_genai import ChatGoogleGenerativeAI
         return ChatGoogleGenerativeAI(model=settings.GEMINI_MODEL, api_key=settings.GEMINI_API_KEY, temperature=0.3, max_tokens=1024)
     
     return None
@@ -35,25 +35,25 @@ async def retrieve_context(question: str, db: AsyncSession, project: str | None 
     citations = []
     for chunk, doc in hits:
         context_parts.append(f"[doc={doc.id} chunk={chunk.chunk_index}] {chunk.content[:500]}")
-        citations.append(f"[{doc.id}, {chunk.chunk_index}]")
+        citations.append({"document_id": doc.id, "chunk_id": chunk.id, "chunk_index": chunk.chunk_index})
     return "\n\n".join(context_parts), citations, hits
 
 async def langchain_query(question:str, db: AsyncSession, top_k: int = 5, project:str | None = None, source:str | None = None, use_llm: bool = True) -> dict:
     """Pipeline RAG completo usando LangChain LCEL."""
-    retrieval = await retrieve_context(question, db, top_k,project, source)
+    context, citations, hits = await retrieve_context(question, db, project=project, source=source, top_k=top_k)
 
-    if not retrieval["context"]:
+    if not context:
         return {
             "answer": "Nao encontrei contexto suficiente nos documentos indexados.",
             "citations": [],
             "retrieved_context_preview": "",
         }
-    preview = retrieval["context"][:2000]
+    preview = context[:2000]
     if use_llm:
         try:
             llm = _get_llm()
             chain = RAG_PROMPT | llm | StrOutputParser()
-            answer = await chain.ainvoke({"context": retrieval["context"], "question": question})
+            answer = await chain.ainvoke({"context": context, "question": question})
         except Exception as e:
             logger.error(f"LLM generation failed: {type(e).__name__} - {str(e)}")
             answer = f"[LLM indisponivel: {type(e).__name__}] Encontrei estes trechos relevantes nos documentos.\n\n{preview}"
@@ -61,6 +61,6 @@ async def langchain_query(question:str, db: AsyncSession, top_k: int = 5, projec
         answer = f"Encontrei estes trechos relevantes nos documentos.\n\n{preview}"
     return {
         "answer": answer,
-        "citations": retrieval["citations"],    
+        "citations": citations,
         "retrieved_context_preview": preview,
     }
