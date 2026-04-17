@@ -29,7 +29,6 @@ def _convert_tools_spec_to_gemini(tools_spec: list) -> list[types.Tool]:
     return [types.Tool(function_declarations=function_declarations)]
 
 
-
 async def basic_agent(user_question: str, max_iterations: int = 5)-> str:
     """
     Agent que pode chamar tools em loop até decidir responder.
@@ -76,4 +75,3 @@ async def basic_agent(user_question: str, max_iterations: int = 5)-> str:
                 )]
             ))
     return "Limite de iterações atingido. Não consegui completar a tarefa."
-
