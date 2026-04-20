@@ -29,12 +29,16 @@ async def search_documents(query: str, top_k: int = 5, use_hybrid: bool = False)
 
 @lc_tool
 async def count_documents(project: str | None = None) -> str:
-    pass
+    """Conta quantos documentos estão indexados. Opcional: filtrar por projeto.
+    Use quando o usuário perguntar 'quantos documentos você tem?'."""
+    return await execute_tool("count_documents", {"project": project})
 
 
 @lc_tool
-async def summary_doc(query: str, top_k: int = 5, use_hybrid: bool = False) -> str:
-    pass
+async def summary_doc(query: str, top_k: int = 5) -> str:
+    """Busca chunks relacionados e retorna o conteúdo para você (LLM) resumir.
+    Use quando o usuário pede um 'resumo' ou 'visão geral' de um tema."""
+    return await execute_tool("summary_doc", {"query": query, "top_k": top_k})
 
 TOOLS = [search_documents, count_documents, summary_doc]
 
@@ -125,7 +129,7 @@ def build_agent_graph():
         {"tools": "tools", "end": END}
     )
 
-    graph.add_edge("tools", "call_model") # depois de tools, volta ao modelo
+    graph.add_edges("tools", "call_model") # depois de tools, volta ao modelo
 
     return graph.compile()
 
@@ -157,7 +161,7 @@ async def run_graph_agent(user_question: str) -> str:
         "iterations": 0,
     }
 
-    final_state = await graph.aivoke(initial_state)
+    final_state = await graph.ainvoke(initial_state)
 
     # Última AIMessage sem tool_calls é a resposta final
     for msg in reversed(final_state["messages"]):
