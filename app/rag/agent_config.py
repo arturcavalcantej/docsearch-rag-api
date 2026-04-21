@@ -1,0 +1,12 @@
+"""Configurações do agent."""
+# Timeouts
+TOOL_TIMEOUT_SECONDS = 30.0
+LLM_TIMEOUT_SECONDS = 60.0
+
+# Limites de iteração
+MAX_ITERATIONS = 10
+
+# Retry
+TOOL_RETRY_MAX_ATTEMPTS = 3
+TOOL_RETRY_MIN_WAIT = 1.0
+TOOL_RETRY_MAX_WAIT = 10.0
